@@ -50,3 +50,36 @@
        (pascal 5 3) => 10
        (pascal 5 4) => 5
        (pascal 5 5) => 1)
+
+(facts "fast-expn-iter"
+       (fast-expn-iter 2 0) => 1
+       (fast-expn-iter 2 1) => 2
+       (fast-expn-iter 2 2) => 4
+       (fast-expn-iter 2 3) => 8
+       (fast-expn-iter 2 4) => 16
+
+       (fast-expn-iter 10 0) => 1
+       (fast-expn-iter 10 1) => 10
+       (fast-expn-iter 10 2) => 100
+       (fast-expn-iter 10 3) => 1000
+       (fast-expn-iter 10 4) => 10000
+       (fast-expn-iter 10 5) => 100000
+       (fast-expn-iter 10 6) => 1000000
+
+       (fast-expn-iter 3 5) => 243)
+
+(facts "fast-mult-rec"
+       (fast-mult-rec 3 1) => 3
+       (fast-mult-rec 1 3) => 3
+       (fast-mult-rec 10 200) => 2000
+       (fast-mult-rec 5 6) => 30
+       (fast-mult-rec 1 10) => 10
+       (fast-mult-rec 10 1) => 10)
+
+(facts "fast-mult-iter"
+       (fast-mult-iter 3 1) => 3
+       (fast-mult-iter 1 3) => 3
+       (fast-mult-iter 10 200) => 2000
+       (fast-mult-iter 5 6) => 30
+       (fast-mult-iter 1 10) => 10
+       (fast-mult-iter 10 1) => 10)

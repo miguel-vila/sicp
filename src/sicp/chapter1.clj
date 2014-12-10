@@ -43,3 +43,35 @@
   (if (or (= m 0) (= n m))
     1
     (+ (pascal (- n 1) m) (pascal (- n 1) (- m 1)))))
+
+;;Ex 1.16
+(defn fast-expn-iter [b n]
+  (defn iter [exp a]
+    (cond
+     (= exp n) a
+     (or
+      (> (* 2 exp) n)
+      (= exp 0)) (iter (inc exp) (* b a))
+     :else (iter (* 2 exp) (* a a))))
+  (iter 0 1))
+
+;;Ex 1.17
+(defn *2 [x]
+  (+ x x))
+
+(defn fast-mult-rec [a b]
+  (cond
+   (= b 0) 0
+   (= (mod b 2) 0) (*2 (fast-mult-rec a (/ b 2)))
+   :else (+ a (fast-mult-rec a (dec b)))))
+
+;;Ex 1.18
+(defn fast-mult-iter [a b]
+  (defn iter [mult res]
+    (cond
+     (= mult b) res
+     (or
+      (> (* 2 mult) b)
+      (= mult 0)) (iter (inc mult) (+ res a))
+     :else (iter (* 2 mult) (*2 res))))
+  (iter 0 0))
