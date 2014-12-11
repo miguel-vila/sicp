@@ -80,6 +80,12 @@
 (defn square-mod-n [x n]
   (mod (square x) n))
 
+(defn non-trivial-square-root-of-1-mod-n [x n]
+  (and
+   (not= x 1)
+   (not= x (- n 1))
+   (= (square-mod-n x n) 1)))
+
 (defn expmod [base exp m]
   (cond
    (= exp 0) 1
