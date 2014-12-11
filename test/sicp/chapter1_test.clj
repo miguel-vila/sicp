@@ -83,3 +83,16 @@
        (fast-mult-iter 5 6) => 30
        (fast-mult-iter 1 10) => 10
        (fast-mult-iter 10 1) => 10)
+
+(facts "square-mod-n"
+       (square-mod-n 3 8) => 1
+       (square-mod-n 2 7) => 4
+       (square-mod-n 4 16) => 0)
+
+(facts "expmod"
+       (expmod 2 3 7) => 1
+       (expmod 2 4 20) => 16
+       (expmod 5 3 20) => 5
+       (expmod 1 1000 43) => 1
+       (expmod 3 5 243) => 0
+       (expmod 3 4 80) => 1)

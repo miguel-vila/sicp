@@ -75,3 +75,13 @@
       (= mult 0)) (iter (inc mult) (+ res a))
      :else (iter (* 2 mult) (*2 res))))
   (iter 0 0))
+
+;;Ex 1.28
+(defn square-mod-n [x n]
+  (mod (square x) n))
+
+(defn expmod [base exp m]
+  (cond
+   (= exp 0) 1
+   (even? exp) (rem (square (expmod base (/ exp 2) m)) m)
+   :else (rem (* base (expmod base (- exp 1) m)) m )))
