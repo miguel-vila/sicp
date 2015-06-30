@@ -91,3 +91,77 @@
    (= exp 0) 1
    (even? exp) (rem (square (expmod base (/ exp 2) m)) m)
    :else (rem (* base (expmod base (- exp 1) m)) m )))
+
+;;Ex 1.37
+(defn cont-frac [n d k]
+  (defn loop [i]
+    (let
+      [_n (n i)
+       _d (d i)]
+      (if (= i k)
+        (/ _n _d)
+        (/ _n (+ _d (loop (inc i)))))))
+  (loop 1))
+
+(defn cont-frac-iter [n d k]
+  (defn loop [i acc]
+    (if (= i 0)
+      acc
+      (loop (dec i) (/ (n i) (+ (d i) acc)))))
+  (loop k 0.0))
+
+(defn approx-phi [k]
+  (/ 1 (cont-frac (fn [_] 1.0) (fn [_] 1.0) k)))
+
+(defn approx-phi-iter [k]
+  (/ 1 (cont-frac-iter (fn [_] 1.0) (fn [_] 1.0) k)))
+
+(approx-phi 2)
+
+(approx-phi-iter 2)
+
+;; Ex 1.38
+(defn approx-e [k]
+  (defn _seq [i]
+    (cond
+     (= i 1) 1
+     (= (mod (- i 2) 3) 0) (* 2 (inc (/ (- i 2) 3)))
+     :else 1))
+  (+ 2 (cont-frac-iter (fn [_] 1.0) _seq k)))
+
+(approx-e 10)
+
+(defn tan-cf [x k]
+  (- (cont-frac-iter (fn [i] (- (Math/pow x i))) (fn [i] (inc (* (dec i) 2))) k)))
+
+(Math/tan 1)
+(tan-cf 1 3)
+
+;; Ex. 1.41
+(defn _double [f]
+  (fn [x] (f (f x))))
+
+;; Ex. 1.42
+(defn compose [f g]
+  (fn [x] (f (g x))))
+
+;; Ex. 1.43
+(defn repeated [f n]
+  (if (= n 1)
+    f
+    (compose f (repeated f (dec n)))))
+
+(defn repeated [f n]
+  (reduce compose (take n (repeat f))))
+
+((repeated square 1) 5)
+
+;; Ex. 1.44
+(defn average [& all]
+  (/ (reduce + all) (count all)))
+
+(defn smoothed [f dx]
+  (fn [x] (average
+           (f (- x dx))
+           (f x)
+           (f (+ x dx)))))
