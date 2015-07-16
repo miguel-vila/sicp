@@ -53,3 +53,55 @@
         y (chapter1/average (y-point sp) (y-point ep))]
     (make-point x y)))
 
+(defn manhattan-distance [p1 p2]
+  (let [w (Math/abs (- (x-point p1) (x-point p2)))
+        h (Math/abs (- (x-point p1) (x-point p2)))]
+    (+ w h)))
+
+(defrecord Rectangle [p1 p2])
+
+(defn make-rectangle [p1 p2]
+  (Rectangle. p1 p2))
+
+(defn p1-rectangle [r]
+  (:p1 r))
+
+(defn p2-rectangle [r]
+  (:p2 r))
+
+(defn height-rectangle [r]
+  (let [p1 (p1-rectangle r)
+        p2 (p2-rectangle r)]
+    (Math/abs (- (x-point p1) (x-point p2)))))
+
+(defn width-rectangle [r]
+  (let [p1 (p1-rectangle r)
+        p2 (p2-rectangle r)]
+    (Math/abs (- (y-point p1) (y-point p2)))))
+
+(defn perimeter-rectangle [r]
+  (* 2 (+ (width-rectangle r) (height-rectangle r))))
+
+(defn area-rectangle [r]
+  (* (width-rectangle r) (height-rectangle r)))
+
+(defn zero [f]
+  (fn [x] x))
+
+(defn add-1 [n]
+  (fn [f] (fn [x] (f ((n f) x)))))
+
+(def one
+  (fn [f] (fn [x] (f x))))
+
+(def two
+  (fn [f] (fn [x] (f (f x)))))
+
+(defn plus [a b]
+  (fn [f]
+    (let
+      [f1 (a f)
+       f2 (b f)]
+      (fn [x] (f1 (f2 x))))))
+
+
