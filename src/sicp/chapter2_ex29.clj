@@ -40,17 +40,38 @@
   (:structure branch))
 
 ; Total weight
+(declare structure-weight)
+
 (t/ann total-weight [Mobile -> Number])
 (defn total-weight [mobile]
-  (t/letfn> [structure-weight :- [Structure -> Number]
-             (structure-weight [structure]
-                               (match structure
-                                        [:weight weight] weight
-                                        [:mobile _mobile] (total-weight _mobile)))
-             branch-weight :- [Branch -> Number]
+  (t/letfn> [branch-weight :- [Branch -> Number]
              (branch-weight [branch]
                             (structure-weight (branch-structure branch)))]
-            (let
-              [left (branch-weight (left-branch mobile))
-               right (branch-weight (right-branch mobile))]
-              (+ left right))))
+            (+ (branch-weight (left-branch mobile))
+               (branch-weight (right-branch mobile)))))
+
+(t/ann structure-weight [Structure -> Number])
+(defn structure-weight [structure]
+  (match structure
+         [:weight weight] weight
+         [:mobile mobile] (total-weight mobile)))
+
+
+(declare balanced?)
+(t/ann balanced-structure? [Structure -> Boolean])
+(defn balanced-structure? [structure]
+                                  (match structure
+                                         [:weight _] true
+                                         [:mobile _mobile] (balanced? _mobile)))
+(t/ann balanced? [Mobile -> Boolean])
+(defn balanced? [mobile]
+             (let [left-b (left-branch mobile)
+                   right-b (right-branch mobile)
+                   left-s (branch-structure left-b)
+                   right-s (branch-structure right-b)]
+               (and
+                (balanced-structure? left-s)
+                (balanced-structure? right-s)
+                (=
+                 (* (branch-length left-b) (structure-weight left-s))
+                 (* (branch-length right-b) (structure-weight right-s))))))
