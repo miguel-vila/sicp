@@ -14,4 +14,5 @@
                   :plugins [[lein-midje "3.1.3"]
                             [lein-typed "0.3.4"]]}}
 
-  :core.typed {:check [sicp.chapter2_ex29]})
+  :core.typed {:check [sicp.chapter2_ex29
+                       sicp.chapter2_ex30]})

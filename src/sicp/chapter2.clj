@@ -148,3 +148,116 @@
        bs (first (rest xs))]
       (concat (fringe-item as) (fringe-item bs)))))
 
+;;Ex 2.32
+(defn subsets [s]
+  (if (or (= s '()) (nil? s))
+    (list '())
+    (let [rest-subsets (subsets (rest s))]
+      (concat rest-subsets (map (fn [subset] (cons (first s) subset)) rest-subsets)))))
+
+(defn accumulate [f z xs]
+  (if (or (= xs '()) (nil? xs))
+    z
+    (f (first xs)
+       (accumulate f z (rest xs)))))
+
+;;Ex 2.33
+(defn map-using-accumulate [f xs]
+  (accumulate #(cons (f %1) %2) nil xs))
+
+(defn append-using-accumulate [xs ys]
+  (accumulate cons ys xs))
+
+(defn length-using-accumulate [xs]
+  (accumulate #(inc %2) 0 xs))
+
+;;Ex 2.34
+(defn horner-eval [x cffs]
+  (accumulate (fn [cff px] (+ cff (* x px))) 0 cffs))
+
+;;Ex 2.36
+(defn accumulate-n [f z xss]
+  (if (or (= (first xss) '()) (nil? (first xss)))
+    nil
+    (cons (accumulate f z (map first xss))
+          (accumulate-n f z (map rest xss)))))
+
+;;(accumulate-n + 0 '((1 2 3) (4 5 6) (7 8 9) (10 11 12)))
+
+;;Ex 2.37
+(defn dot-product [v w]
+  (accumulate + 0 (map * v w)))
+
+;;(dot-product (list 1 2 3) (list 4 5 6))
+
+(defn matrix-*-vector [m v]
+  (map #(dot-product % v) m))
+
+(def m (list
+        (list 1 2 3 4)
+        (list 4 5 6 6)
+        (list 6 7 8 9)))
+
+(dot-product (list 1 2 3 4) (list 1 2 3 4))
+(dot-product (list 1 2 3 4) (list 4 5 6 6))
+(dot-product (list 1 2 3 4) (list 6 7 8 9))
+(matrix-*-vector m (list 1 2 3 4))
+
+;;Ex 2.39
+(defn fold-right [f z xs]
+  (if (or (= xs '()) (nil? xs))
+    z
+    (f (first xs)
+       (fold-right f z (rest xs)))))
+
+(defn fold-left [f z xs]
+  (defn iter [acc xs]
+    (if (or (= xs '()) (nil? xs))
+      acc
+      (iter (f acc (first xs)) (rest xs))))
+  (iter z xs))
+
+(defn my-reverse-fold-right [xs]
+  (fold-right (fn[x y] (concat y (list x))) nil xs))
+
+(my-reverse-fold-right (list 1 2 3))
+
+(defn my-reverse-fold-left [xs]
+  (fold-left (fn [x y] (cons y x)) nil xs))
+
+(my-reverse-fold-left (list 1 2 3))
+
+(defn flatmap [f xs]
+  (accumulate concat nil (map f xs)))
+
+(flatmap (fn [i] (range 0 (inc i))) (range 1 5))
+
+;;Ex 2.40
+(defn unique-pairs [n]
+  (flatmap
+   (fn [j] (map (fn [i] (list i j))
+                (range 1 j)))
+   (range 1 (inc n))))
+
+(unique-pairs 3)
+
+(defn unique-triples [n]
+  (flatmap
+   (fn [pair]
+     (let [[i j] pair]
+       (map
+        (fn [k] (list i j k))
+        (range (inc j) (inc n)))))
+   (unique-pairs n)))
+
+(unique-triples 4)
+
+;;Ex 2.41
+(defn sum [xs]
+  (accumulate + 0 xs))
+
+(defn find-triples-sum [n s]
+  (filter
+   #(= (sum %) s)
+   (unique-triples n)))
+
