@@ -1,7 +1,8 @@
 (ns sicp.chapter2-test
   (:require [sicp.chapter2 :refer :all]
             [sicp.chapter2_ex29 :refer :all]
-            [sicp.chapter2_ex30 :refer :all])
+            [sicp.chapter2_ex30 :refer :all]
+            [sicp.chapter2_ex42 :refer :all])
   (:use midje.sweet))
 
 (def mobile1 (make-mobile
@@ -80,3 +81,10 @@
 
 (facts "horner-eval"
        (horner-eval 2 (list 1 3 0 5 0 1)) => 79)
+
+(facts "queens"
+       (queens 0) => '(())
+       (queens 1) => '(((1 1)))
+       (queens 2) => '()
+       (queens 3) => '()
+       (queens 4) => '(((3 4) (1 3) (4 2) (2 1)) ((2 4) (4 3) (1 2) (3 1))))
