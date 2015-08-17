@@ -15,5 +15,4 @@
                             [lein-typed "0.3.4"]]}}
 
   :core.typed {:check [sicp.chapter2_ex29
-                       sicp.chapter2_ex30
-                       sicp.chapter2_ex42]})
+                       sicp.chapter2_ex30]})
