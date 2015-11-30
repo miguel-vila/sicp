@@ -2,7 +2,8 @@
   (:require [sicp.chapter2 :refer :all]
             [sicp.chapter2_ex29 :refer :all]
             [sicp.chapter2_ex30 :refer :all]
-            [sicp.chapter2_ex42 :refer :all])
+            [sicp.chapter2_ex42 :refer :all]
+            [sicp.chapter2_ex56 :refer :all])
   (:use midje.sweet))
 
 (def mobile1 (make-mobile
@@ -88,3 +89,36 @@
        (queens 2) => '()
        (queens 3) => '()
        (queens 4) => '(((3 4) (1 3) (4 2) (2 1)) ((2 4) (4 3) (1 2) (3 1))))
+
+(facts "eq-symbol"
+       (eq-symbol 'a 'a) => true
+       (eq-symbol 'a 'b) => false
+       (eq-symbol '() '()) => true
+       (eq-symbol '(a) 'a) => false
+       (eq-symbol '(list a b) '(list a b)) => true
+       (eq-symbol '(list a b) '(list a c)) => false)
+
+(def f #(+ 1 %))
+
+(facts "church numerals"
+       ((zero f) 0) => 0
+       ((one f) 0) => 1
+       ((two f) 0) = 2
+       (((plus one zero) f) 0) => 1
+       (((plus one two) f) 0) => 3
+       (((plus one one) f) 0) => 2
+       (((plus two three) f) 0) => 5)
+
+(facts "derive-alg-exp"
+       (derive-alg-exp (to-alg-exp '7) (make-var "x"))                   => (to-alg-exp '0)
+       (derive-alg-exp (to-alg-exp 'x) (make-var "x"))                   => (to-alg-exp '1)
+       (derive-alg-exp (to-alg-exp 'x) (make-var "y"))                   => (to-alg-exp '0)
+       (derive-alg-exp (to-alg-exp '(* 2 x)) (make-var "x"))             => (to-alg-exp '2)
+       (derive-alg-exp (to-alg-exp '(+ (* 3 x) 7)) (make-var "x"))       => (to-alg-exp '3)
+       (derive-alg-exp (to-alg-exp '(+ (* 3 x) (* 2 y))) (make-var "x")) => (to-alg-exp '3)
+       (derive-alg-exp (to-alg-exp '(* x y)) (make-var "x"))             => (to-alg-exp 'y)
+       (derive-alg-exp (to-alg-exp '(* (* x y) (+ x 3))) (make-var "x")) => (to-alg-exp '(+ (* x y) (* y (+ x 3))))
+       (derive-alg-exp (to-alg-exp '(exp x 2)) (make-var "x"))           => (to-alg-exp '(* 2 x))
+       )
+
+

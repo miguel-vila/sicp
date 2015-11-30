@@ -96,7 +96,10 @@
   (fn [f] (fn [x] (f x))))
 
 (def two
-  (fn [f] (fn [x] (f (f x)))))
+  (fn [f] (comp f f)))
+
+(def three
+  (fn [f] (comp f f f)))
 
 (defn plus [a b]
   (fn [f]
@@ -261,3 +264,11 @@
    #(= (sum %) s)
    (unique-triples n)))
 
+; Ex 2.54
+(defn eq-symbol [xs ys]
+  (cond
+   (and (symbol? xs) (symbol? ys)) (= xs ys)
+   (and (list? xs) (list? ys))
+     (or (and (empty? xs) (empty? ys))
+         (and (= (first xs) (first ys)) (eq-symbol (rest xs) (rest ys))))
+   :otherwise false))
