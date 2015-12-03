@@ -13,10 +13,10 @@
   '[(t/Value :num) Number])
 
 (t/defalias Sum
-  '{:addend AlgExp :augend AlgExp})
+  '{:summands (t/NonEmptySeq AlgExp)})
 
 (t/defalias Product
-  '{:multiplier AlgExp :multiplicand AlgExp})
+  '{:multiplicands (t/NonEmptySeq AlgExp)})
 
 (t/defalias Exponent
   '{:base AlgExp :exponent Num})
@@ -39,70 +39,38 @@
        t/Symbol
        (t/List ExpS)))
 
-; ----------------------
-; Constructors & Getters
-; ----------------------
+; ------------
+; Constructors
+; ------------
 
-(t/ann make-var [String -> Var])
-(defn make-var [name]
-  [:var name])
-
-(t/ann get-addend [Sum -> AlgExp])
-(defn get-addend [sum]
-  (:addend sum))
-
-(t/ann get-augend [Sum -> AlgExp])
-(defn get-augend [sum]
-  (:augend sum))
-
-(t/ann get-multiplier [Product -> AlgExp])
-(defn get-multiplier [prod]
-  (:multiplier prod))
-
-(t/ann get-multiplicand [Product -> AlgExp])
-(defn get-multiplicand [prod]
-  (:multiplicand prod))
-
-(t/ann get-base [Exponent -> AlgExp])
-(defn get-base [exp]
-  (:base exp))
-
-(t/ann get-exponent [Exponent -> Num])
-(defn get-exponent [exp]
-  (:exponent exp))
-
-(t/ann is-zero? [AlgExp -> Boolean])
-(defn is-zero? [exp]
-  (match exp
-         [:num 0]    true
-         _           false))
-
-(t/ann make-sum [AlgExp AlgExp -> AlgExp])
-(defn make-sum
-  [left right]
-  (cond
-   (is-zero? left)   right
-   (is-zero? right)  left
-   :otherwise        [:sum {:addend left :augend right}]))
-
-(t/ann is-one? [AlgExp -> Boolean])
-(defn is-one? [exp]
-  (match exp
-         [:num 1]    true
-         _           false))
+(declare is-one? is-zero?)
 
 (t/ann make-num [Number -> Num])
 (defn make-num [n]
   [:num n])
 
-(t/ann make-prod [AlgExp AlgExp -> AlgExp])
+(t/ann make-var [String -> Var])
+(defn make-var [name]
+  [:var name])
+
+(t/ann make-sum [AlgExp * -> AlgExp])
+(defn make-sum
+  [& _exps]
+  (let [exps (filter (complement is-zero?) (seq _exps))]
+    (cond
+     (empty? exps)         (make-num 0)
+     (= (count exps) 1)    (first exps)
+     :otherwise            [:sum {:summands exps}])))
+
+(t/ann make-prod [AlgExp * -> AlgExp])
 (defn make-prod
-  [left right]
-  (cond
-   (or (is-zero? left) (is-zero? right))   (make-num 0)
-   (is-one? left)                          right
-   (is-one? right)                         left
-   :otherwise                              [:prod {:multiplier left :multiplicand right}]))
+  [& _exps]
+  (let [exps (filter (complement is-one?) (seq _exps))]
+    (cond
+     (empty? exps)         (make-num 1)
+     (some is-zero? exps)  (make-num 0)
+     (= (count exps) 1)    (first exps)
+     :otherwise            [:prod {:multiplicands exps}])))
 
 (t/ann make-exp [AlgExp Num -> AlgExp])
 (defn make-exp
@@ -112,28 +80,87 @@
    (is-one?  exponent)  base
    :otherwise           [:exp {:base base :exponent exponent}]))
 
+; -------
+; Getters
+; -------
+
+(t/ann get-addend [Sum -> AlgExp])
+(defn get-addend [sum]
+  (first (:summands sum)))
+
+(t/ann get-augend [Sum -> AlgExp])
+(defn get-augend [sum]
+  (let [tail (rest (:summands sum))]
+    (apply make-sum tail)))
+
+(t/ann get-multiplier [Product -> AlgExp])
+(defn get-multiplier [prod]
+  (first (:multiplicands prod)))
+
+(t/ann get-multiplicand [Product -> AlgExp])
+(defn get-multiplicand [prod]
+  (let [tail (rest (:multiplicands prod))]
+    (apply make-prod tail)))
+
+(t/ann get-base [Exponent -> AlgExp])
+(defn get-base [exp]
+  (:base exp))
+
+(t/ann get-exponent [Exponent -> Num])
+(defn get-exponent [exp]
+  (:exponent exp))
+
+(t/ann var-name [Var -> String])
+(defn var-name [[:var var-name]]
+  var-name)
+
+; ----------
+; Predicates
+; ----------
+
+(t/ann is-zero? [AlgExp -> Boolean])
+(defn is-zero? [exp]
+  (match exp
+         [:num 0]    true
+         _           false))
+
+(t/ann is-one? [AlgExp -> Boolean])
+(defn is-one? [exp]
+  (match exp
+         [:num 1]    true
+         _           false))
+
+; ------------------
+; Helper constructor
+; ------------------
+
 (t/ann ^:no-check to-alg-exp [ExpS -> AlgExp])
 (defn to-alg-exp [exp]
   "Converts a symbol expression (e.g. '(* (+ x 3) (exp y 2)) ) into a AlgExp value"
   (cond (number? exp)
           [:num exp]
         (list? exp)
-          (let [[op left right] (to-array exp)]
+          (let [[op & r] (to-array exp)
+                [left right] r]
             (match op
-                   '+     (make-sum   (to-alg-exp left) (to-alg-exp right))
-                   '*     (make-prod  (to-alg-exp left) (to-alg-exp right))
+                   '+     (apply make-sum  (map to-alg-exp r))
+                   '*     (apply make-prod (map to-alg-exp r))
                    'exp   (make-exp   (to-alg-exp left) (to-alg-exp right))
                    ))
         (symbol? exp)
           (make-var (name exp))))
 
-(t/ann var-name [Var -> String])
-(defn var-name [[:var var-name]]
-  var-name)
+; ---------
+; Modifiers
+; ---------
 
 (t/ann decrease-number [Num -> Num])
 (defn decrease-number [[:num n]]
   (make-num (dec n)))
+
+; ---------
+; Derivator
+; ---------
 
 (t/ann derive-alg-exp [AlgExp Var -> AlgExp])
 (defn derive-alg-exp
@@ -160,8 +187,7 @@
          [:exp exponentiation]
            (make-prod
             (get-exponent exponentiation)
-            (make-prod
-             (make-exp
-               (get-base exponentiation)
-               (decrease-number (get-exponent exponentiation)))
-             (derive-alg-exp (get-base exponentiation) var)))))
+            (make-exp
+             (get-base exponentiation)
+             (decrease-number (get-exponent exponentiation)))
+            (derive-alg-exp (get-base exponentiation) var))))

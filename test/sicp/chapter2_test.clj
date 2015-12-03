@@ -118,7 +118,9 @@
        (derive-alg-exp (to-alg-exp '(+ (* 3 x) (* 2 y))) (make-var "x")) => (to-alg-exp '3)
        (derive-alg-exp (to-alg-exp '(* x y)) (make-var "x"))             => (to-alg-exp 'y)
        (derive-alg-exp (to-alg-exp '(* (* x y) (+ x 3))) (make-var "x")) => (to-alg-exp '(+ (* x y) (* y (+ x 3))))
+       (derive-alg-exp (to-alg-exp '(* x y (+ x 3))) (make-var "x"))     => (to-alg-exp '(+ (* x y) (* y (+ x 3))))
        (derive-alg-exp (to-alg-exp '(exp x 2)) (make-var "x"))           => (to-alg-exp '(* 2 x))
+       (derive-alg-exp (to-alg-exp '(+ (* 3 x) (* 2 y) (exp x 2))) (make-var "x")) => (to-alg-exp '(+ 3 (* 2 x)))
        )
 
 
