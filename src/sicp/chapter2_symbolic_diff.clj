@@ -1,4 +1,4 @@
-(ns sicp.chapter2_ex56
+(ns sicp.chapter2_symbolic_diff
   (:require [clojure.core.typed :as t]
             [clojure.core.match :refer [match]]))
 

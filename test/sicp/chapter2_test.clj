@@ -3,7 +3,7 @@
             [sicp.chapter2_ex29 :refer :all]
             [sicp.chapter2_ex30 :refer :all]
             [sicp.chapter2_ex42 :refer :all]
-            [sicp.chapter2_ex56 :refer :all])
+            [sicp.chapter2_symbolic_diff :refer :all])
   (:use midje.sweet))
 
 (def mobile1 (make-mobile
