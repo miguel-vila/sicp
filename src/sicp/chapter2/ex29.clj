@@ -1,4 +1,4 @@
-(ns sicp.chapter2_ex29
+(ns sicp.chapter2.ex29
   (:require [clojure.core.typed :as t]
             [clojure.core.match :refer [match]]))
 

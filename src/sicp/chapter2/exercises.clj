@@ -1,5 +1,5 @@
-(ns sicp.chapter2
-  (:require [sicp.chapter1 :as chapter1]
+(ns sicp.chapter2.exercises
+  (:require [sicp.chapter1.exercises :as chapter1]
             [clojure.core.match :refer [match]]))
 
 (defn gcd [a b]

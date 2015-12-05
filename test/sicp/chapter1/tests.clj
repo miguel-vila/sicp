@@ -1,5 +1,5 @@
-(ns sicp.chapter1-test
-  (:require [sicp.chapter1 :refer :all])
+(ns sicp.chapter1.tests
+  (:require [sicp.chapter1.exercises :refer :all])
   (:use midje.sweet))
 
 (facts "square-sum-biggest"

@@ -1,9 +1,8 @@
-(ns sicp.chapter2-test
-  (:require [sicp.chapter2 :refer :all]
-            [sicp.chapter2_ex29 :refer :all]
-            [sicp.chapter2_ex30 :refer :all]
-            [sicp.chapter2_ex42 :refer :all]
-            [sicp.chapter2_symbolic_diff :refer :all])
+(ns sicp.chapter2.tests
+  (:require [sicp.chapter2.exercises :refer :all]
+            [sicp.chapter2.ex29 :refer :all]
+            [sicp.chapter2.ex30 :refer :all]
+            [sicp.chapter2.ex42 :refer :all])
   (:use midje.sweet))
 
 (def mobile1 (make-mobile
@@ -108,19 +107,3 @@
        (((plus one two) f) 0) => 3
        (((plus one one) f) 0) => 2
        (((plus two three) f) 0) => 5)
-
-(facts "derive-alg-exp"
-       (derive-alg-exp (to-alg-exp '7) (make-var "x"))                   => (to-alg-exp '0)
-       (derive-alg-exp (to-alg-exp 'x) (make-var "x"))                   => (to-alg-exp '1)
-       (derive-alg-exp (to-alg-exp 'x) (make-var "y"))                   => (to-alg-exp '0)
-       (derive-alg-exp (to-alg-exp '(* 2 x)) (make-var "x"))             => (to-alg-exp '2)
-       (derive-alg-exp (to-alg-exp '(+ (* 3 x) 7)) (make-var "x"))       => (to-alg-exp '3)
-       (derive-alg-exp (to-alg-exp '(+ (* 3 x) (* 2 y))) (make-var "x")) => (to-alg-exp '3)
-       (derive-alg-exp (to-alg-exp '(* x y)) (make-var "x"))             => (to-alg-exp 'y)
-       (derive-alg-exp (to-alg-exp '(* (* x y) (+ x 3))) (make-var "x")) => (to-alg-exp '(+ (* x y) (* y (+ x 3))))
-       (derive-alg-exp (to-alg-exp '(* x y (+ x 3))) (make-var "x"))     => (to-alg-exp '(+ (* x y) (* y (+ x 3))))
-       (derive-alg-exp (to-alg-exp '(exp x 2)) (make-var "x"))           => (to-alg-exp '(* 2 x))
-       (derive-alg-exp (to-alg-exp '(+ (* 3 x) (* 2 y) (exp x 2))) (make-var "x")) => (to-alg-exp '(+ 3 (* 2 x)))
-       )
-
-

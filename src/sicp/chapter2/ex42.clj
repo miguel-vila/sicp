@@ -1,6 +1,6 @@
-(ns sicp.chapter2_ex42
+(ns sicp.chapter2.ex42
   (:require ;[clojure.core.typed :as t]
-   [sicp.chapter2 :refer [flatmap]]
+   [sicp.chapter2.exercises :refer [flatmap]]
    [clojure.core.match :refer [match]]))
 
 ;(t/defalias Position

@@ -1,4 +1,4 @@
-(ns sicp.chapter2_symbolic_diff
+(ns sicp.chapter2.symbolic_diff
   (:require [clojure.core.typed :as t]
             [clojure.core.match :refer [match]]))
 
@@ -28,22 +28,11 @@
        '[(t/Value :prod) Product]
        '[(t/Value :exp)  Exponent]))
 
-(t/defalias Op
-  (t/U (t/Value '*)
-       (t/Value '+)
-       (t/Value (symbol "^"))))
-
-(t/defalias ExpS
-  (t/U Number
-       Op
-       t/Symbol
-       (t/List ExpS)))
-
 ; ------------
 ; Constructors
 ; ------------
 
-(declare is-one? is-zero?)
+(declare is-one? is-zero? get-all-summands get-all-multiplicands)
 
 (t/ann make-num [Number -> Num])
 (defn make-num [n]
@@ -53,16 +42,22 @@
 (defn make-var [name]
   [:var name])
 
-(t/ann make-sum [AlgExp * -> AlgExp])
+(t/ann ^:no-check make-sum [AlgExp * -> AlgExp]) ;core typed no infiere correctamente el tipo del último caso :(
 (defn make-sum
   [& _exps]
   (let [exps (filter (complement is-zero?) (seq _exps))]
     (cond
      (empty? exps)         (make-num 0)
      (= (count exps) 1)    (first exps)
-     :otherwise            [:sum {:summands exps}])))
+     :otherwise            (t/letfn> [extract-summands :- [AlgExp -> (t/NonEmptySeq AlgExp)]
+                                      (extract-summands [_exp]
+                                                        (match _exp
+                                                               [:sum sum] (get-all-summands sum)
+                                                               _          (seq [_exp])))]
+                                     [:sum {:summands (mapcat extract-summands exps)}])))) ; Debería inferir (NonEmptySeq AlgExp) pero infiere (Seq AlgExp)
 
-(t/ann make-prod [AlgExp * -> AlgExp])
+; no chequeada por lo mismo que la anterior
+(t/ann ^:no-check make-prod [AlgExp * -> AlgExp])
 (defn make-prod
   [& _exps]
   (let [exps (filter (complement is-one?) (seq _exps))]
@@ -70,7 +65,12 @@
      (empty? exps)         (make-num 1)
      (some is-zero? exps)  (make-num 0)
      (= (count exps) 1)    (first exps)
-     :otherwise            [:prod {:multiplicands exps}])))
+     :otherwise            (t/letfn> [extract-multiplicands :- [AlgExp -> (t/NonEmptySeq AlgExp)]
+                                      (extract-multiplicands [_exp]
+                                                             (match _exp
+                                                                    [:prod prod] (get-all-multiplicands prod)
+                                                                    _            (seq [_exp])))]
+                                     [:prod {:multiplicands (mapcat extract-multiplicands exps)}]))))
 
 (t/ann make-exp [AlgExp Num -> AlgExp])
 (defn make-exp
@@ -84,6 +84,11 @@
 ; Getters
 ; -------
 
+(t/ann get-all-summands [Sum -> (t/NonEmptySeq AlgExp)])
+(defn get-all-summands
+  [sum]
+  (:summands sum))
+
 (t/ann get-addend [Sum -> AlgExp])
 (defn get-addend [sum]
   (first (:summands sum)))
@@ -93,13 +98,18 @@
   (let [tail (rest (:summands sum))]
     (apply make-sum tail)))
 
+(t/ann get-all-multiplicands [Product -> (t/NonEmptySeq AlgExp)])
+(defn get-all-multiplicands
+  [prod]
+  (:multiplicands prod))
+
 (t/ann get-multiplier [Product -> AlgExp])
 (defn get-multiplier [prod]
-  (first (:multiplicands prod)))
+  (first (get-all-multiplicands prod)))
 
 (t/ann get-multiplicand [Product -> AlgExp])
 (defn get-multiplicand [prod]
-  (let [tail (rest (:multiplicands prod))]
+  (let [tail (rest (get-all-multiplicands prod))]
     (apply make-prod tail)))
 
 (t/ann get-base [Exponent -> AlgExp])
@@ -130,26 +140,6 @@
          [:num 1]    true
          _           false))
 
-; ------------------
-; Helper constructor
-; ------------------
-
-(t/ann ^:no-check to-alg-exp [ExpS -> AlgExp])
-(defn to-alg-exp [exp]
-  "Converts a symbol expression (e.g. '(* (+ x 3) (exp y 2)) ) into a AlgExp value"
-  (cond (number? exp)
-          [:num exp]
-        (list? exp)
-          (let [[op & r] (to-array exp)
-                [left right] r]
-            (match op
-                   '+     (apply make-sum  (map to-alg-exp r))
-                   '*     (apply make-prod (map to-alg-exp r))
-                   'exp   (make-exp   (to-alg-exp left) (to-alg-exp right))
-                   ))
-        (symbol? exp)
-          (make-var (name exp))))
-
 ; ---------
 ; Modifiers
 ; ---------
@@ -162,8 +152,8 @@
 ; Derivator
 ; ---------
 
-(t/ann derive-alg-exp [AlgExp Var -> AlgExp])
-(defn derive-alg-exp
+(t/ann deriv [AlgExp Var -> AlgExp])
+(defn deriv
   [alg-exp var]
   (match alg-exp
          [:num _]
@@ -174,15 +164,15 @@
              (make-num 0))
          [:sum sum]
            (make-sum
-            (derive-alg-exp (get-addend sum) var)
-            (derive-alg-exp (get-augend sum) var))
+            (deriv (get-addend sum) var)
+            (deriv (get-augend sum) var))
          [:prod prod]
            (make-sum
             (make-prod
              (get-multiplier prod)
-             (derive-alg-exp (get-multiplicand prod) var))
+             (deriv (get-multiplicand prod) var))
             (make-prod
-             (derive-alg-exp (get-multiplier prod) var)
+             (deriv (get-multiplier prod) var)
              (get-multiplicand prod)))
          [:exp exponentiation]
            (make-prod
@@ -190,4 +180,4 @@
             (make-exp
              (get-base exponentiation)
              (decrease-number (get-exponent exponentiation)))
-            (derive-alg-exp (get-base exponentiation) var))))
+            (deriv (get-base exponentiation) var))))

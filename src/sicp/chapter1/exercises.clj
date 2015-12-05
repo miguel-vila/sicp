@@ -1,4 +1,4 @@
-(ns sicp.chapter1)
+(ns sicp.chapter1.exercises)
 
 (defn square [a]
   (* a a))
